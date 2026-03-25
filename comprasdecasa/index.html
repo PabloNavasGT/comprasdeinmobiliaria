@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Inmuebles</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <div class="top-bar">
+            <div class="search-container">
+                <input type="text" placeholder="Buscar">
+                <button class="search-btn">🔍</button>
+            </div>
+            <button id="btn-nuevo" class="btn-black">Nuevo</button>
+        </div>
+
+        <div class="property-list" id="property-list">
+            </div>
+
+        <div class="pagination">
+            <span>◄</span>
+            <span class="active">1</span>
+            <span>2</span>
+            <span>3</span>
+            <span>4</span>
+            <span>5</span>
+            <span>►</span>
+        </div>
+    </div>
+
+    <div id="modal-inmueble" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2 id="modal-title">Detalle del Inmueble</h2>
+            
+            <div class="modal-body">
+                <div class="modal-photo-area">
+                    <img id="preview-img" src="https://via.placeholder.com/300x300?text=Sin+Foto" alt="Foto">
+                    <label for="foto-upload" class="btn-black btn-foto">
+                        Seleccionar Foto
+                    </label>
+                    <input type="file" id="foto-upload" accept="image/*" style="display: none;">
+                </div>
+                
+                <form id="inmueble-form">
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label>Dirección</label>
+                            <input type="text" id="direccion" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Tipo</label>
+                            <select id="tipo">
+                                <option value="Apartamento">Apartamento</option>
+                                <option value="Casa">Casa</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Ciudad</label>
+                            <input type="text" id="ciudad">
+                        </div>
+                        <div class="input-group">
+                            <label>Departamento</label>
+                            <input type="text" id="departamento">
+                        </div>
+                        <div class="input-group">
+                            <label>Matrícula Inmobiliaria</label>
+                            <input type="text" id="matricula">
+                        </div>
+                        <div class="input-group">
+                            <label>Área (m2)</label>
+                            <input type="text" id="area">
+                        </div>
+                        <div class="input-group">
+                            <label>Propietario</label>
+                            <input type="text" id="propietario">
+                        </div>
+                        <div class="input-group">
+                            <label>Identificación propietario</label>
+                            <input type="text" id="identificacion">
+                        </div>
+                        <div class="input-group">
+                            <label>Valor del inmueble</label>
+                            <input type="text" id="valor" required placeholder="$0">
+                        </div>
+                        <div class="input-group checkbox-group">
+                            <input type="checkbox" id="comercial">
+                            <label for="comercial">Uso comercial</label>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" id="btn-guardar" class="btn-black">Crear Inmueble</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

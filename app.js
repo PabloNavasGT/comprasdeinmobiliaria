@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const inmueblesVisibles = filtrados.slice(inicio, fin);
 
         if (inmueblesVisibles.length === 0) {
-            propertyList.innerHTML = `<p style="text-align:center; padding: 30px; color: #64748b; font-weight: 500;">🌆 No se encontraron torres o inmuebles con los filtros seleccionados.</p>`;
+            propertyList.innerHTML = `<p style="text-align:center; padding: 30px; color: #64748b; font-weight: 500;"> No se encontraron torres o inmuebles con los filtros seleccionados.</p>`;
             paginationContainer.innerHTML = '';
             return;
         }
@@ -81,10 +81,10 @@ document.addEventListener('DOMContentLoaded', () => {
             nuevaFila.innerHTML = `
                 <img src="${inmueble.foto}" alt="${inmueble.tipo}">
                 <div class="prop-type">
-                    <strong>🏢 ${inmueble.tipo}</strong><br>
+                    <strong> ${inmueble.tipo}</strong><br>
                     <small style="color:#64748b;">Niveles: ${inmueble.pisos}</small>
                 </div>
-                <span class="prop-address">📍 ${inmueble.direccion}, ${inmueble.ciudad}</span>
+                <span class="prop-address"> ${inmueble.direccion}, ${inmueble.ciudad}</span>
                 <span class="prop-price"><strong>Q ${Number(inmueble.valor).toLocaleString()}</strong></span>
                 <div class="prop-actions">
                     <a href="#" class="btn-ver">Ver</a>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CityEstate - Gestión de Inmuebles Urbana</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Fondo animado de la ciudad -->
+    <div class="city-skyline">
+        <div class="cloud cloud-1"></div>
+        <div class="cloud cloud-2"></div>
+    </div>
+
+    
+        <!-- CABECERA ESTILO EDIFICIO / CORPORATIVA -->
+        <header class="hero-header">
+            <div class="hero-title-area">
+                <h1>🏙️ CityEstate <span class="subtitle-city">Guatemala</span></h1>
+                <span id="contador-inmuebles" class="badge-contador">Torres activas: 0</span>
+            </div>
+
+            <div class="hero-controls">
+                <div class="search-container">
+                    <input type="text" id="input-buscar" placeholder="🔍 Buscar por zona, dirección o ciudad...">
+                </div>
+
+                <div class="filters-group">
+                    <select id="filtro-tipo">
+                        <option value="">🏢 Todos los Inmuebles</option>
+                        <option value="Apartamento">Apartamento</option>
+                        <option value="Casa">Casa</option>
+                        <option value="Oficina">Oficina</option>
+                        <option value="Local Comercial">Local Comercial</option>
+                        <option value="Bodega">Bodega</option>
+                        <option value="Lote / Terreno">Lote / Terreno</option>
+                        <option value="Finca">Finca</option>
+                    </select>
+
+                    <select id="filtro-precio">
+                        <option value="">💰 Rango de Precio (Q)</option>
+                        <option value="0-500">0 - 500 Q</option>
+                        <option value="500-4000">500 - 4,000 Q</option>
+                        <option value="4000-up">4,000 Q en adelante</option>
+                    </select>
+                </div>
+
+                <button id="btn-nuevo" class="btn-primary">+ Nuevo Edificio / Inmueble</button>
+            </div>
+        </header>
+    <div class="container">
+        <!-- LISTADO ESTILO FACHADA DE EDIFICIO -->
+        <div class="property-list" id="property-list">
+            <!-- Renderizado dinámico -->
+        </div>
+
+        <!-- PAGINACIÓN -->
+        <div class="pagination" id="pagination-container"></div>
+    </div>
+
+    <!-- MODAL DE REGISTRO / DETALLE -->
+    <div id="modal-inmueble" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h2 id="modal-title">Detalle del Inmueble</h2>
+            
+            <div class="modal-body">
+                <div class="modal-photo-area">
+                    <div class="building-window-preview">
+                        <img id="preview-img" src="https://via.placeholder.com/300x300?text=Sin+Foto" alt="Foto">
+                    </div>
+                    <label for="foto-upload" class="btn-primary btn-foto">
+                        📷 Seleccionar Fachada / Foto
+                    </label>
+                    <input type="file" id="foto-upload" accept="image/*" style="display: none;">
+                </div>
+                
+                <form id="inmueble-form">
+                    <div class="form-grid">
+                        <div class="input-group">
+                            <label>Tipo de Inmueble</label>
+                            <select id="tipo" required>
+                                <option value="Apartamento">Apartamento</option>
+                                <option value="Casa">Casa</option>
+                                <option value="Oficina">Oficina</option>
+                                <option value="Local Comercial">Local Comercial</option>
+                                <option value="Bodega">Bodega</option>
+                                <option value="Lote / Terreno">Lote / Terreno</option>
+                                <option value="Finca">Finca</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Dirección Exacta</label>
+                            <input type="text" id="direccion" required placeholder="Ej: 14 calle 5-25 Zona 10">
+                        </div>
+                        <div class="input-group">
+                            <label>Ciudad / Municipio</label>
+                            <input type="text" id="ciudad" required placeholder="Ej: Guatemala">
+                        </div>
+                        <div class="input-group">
+                            <label>Departamento</label>
+                            <input type="text" id="departamento" required placeholder="Ej: Guatemala">
+                        </div>
+                        <div class="input-group">
+                            <label>Número de Pisos / Niveles</label>
+                            <input type="number" id="pisos" min="1" value="1" required placeholder="Ej: 2">
+                        </div>
+                        <div class="input-group">
+                            <label>Área (m²)</label>
+                            <input type="number" id="area" placeholder="Ej: 120">
+                        </div>
+                        <div class="input-group">
+                            <label>Matrícula Inmobiliaria</label>
+                            <input type="text" id="matricula" placeholder="Ej: 1234-GT">
+                        </div>
+                        <div class="input-group">
+                            <label>Propietario</label>
+                            <input type="text" id="propietario" placeholder="Nombre completo">
+                        </div>
+                        <div class="input-group">
+                            <label>Valor del Inmueble (Q)</label>
+                            <input type="number" id="valor" required placeholder="Ej: 3500">
+                        </div>
+                        <div class="input-group checkbox-group">
+                            <input type="checkbox" id="comercial">
+                            <label for="comercial">Apto para uso comercial / Oficinas</label>
+                        </div>
+                        <div class="input-group full-width">
+                            <label>Descripción detallada</label>
+                            <textarea id="descripcion" rows="3" placeholder="Ej: Cuenta con 3 habitaciones, 2 baños, parqueo, vistas panorámicas..."></textarea>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" id="btn-guardar" class="btn-primary">Registrar Inmueble</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

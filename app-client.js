@@ -17,6 +17,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const fotoUpload = document.getElementById('foto-upload');
     const previewImg = document.getElementById('preview-img');
     const btnFotoLabel = document.querySelector('.btn-foto'); 
+
+    // Elementos de autenticación
+    const modalLogin = document.getElementById('modal-login');
+    const btnLoginOpen = document.getElementById('btn-login-open');
+    const closeLoginBtn = document.querySelector('.close-login-btn');
+    const loginForm = document.getElementById('login-form');
+    const btnLogout = document.getElementById('btn-logout');
+    const userDisplay = document.getElementById('user-display');
     
     let listaInmuebles = [];
     let paginaActual = 1;
@@ -27,6 +35,90 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // URL de tu Backend en Node.js / Express
     const API_URL = 'http://localhost:4000/api/inmuebles';
+    const AUTH_URL = 'http://localhost:4000/api/auth';
+
+    // VERIFICAR ESTADO DE LA SESIÓN Y ROLES
+    function verificarEstadoSesion() {
+        const token = localStorage.getItem('token');
+        const rol = localStorage.getItem('rol');
+        const nombre = localStorage.getItem('nombre');
+
+        if (token) {
+            if (btnLoginOpen) btnLoginOpen.style.display = 'none';
+            if (btnLogout) btnLogout.style.display = 'block';
+            if (userDisplay) userDisplay.textContent = `👤 ${nombre} (${rol ? rol.toUpperCase() : 'USER'})`;
+
+            // Si es un usuario normal ('user'), ocultar el botón de crear inmueble
+            if (rol !== 'admin' && btnNuevo) {
+                btnNuevo.style.display = 'none';
+            } else if (rol === 'admin' && btnNuevo) {
+                btnNuevo.style.display = 'block';
+            }
+        } else {
+            if (btnLoginOpen) btnLoginOpen.style.display = 'block';
+            if (btnLogout) btnLogout.style.display = 'none';
+            if (userDisplay) userDisplay.textContent = '';
+            if (btnNuevo) btnNuevo.style.display = 'none'; // Los visitantes no pueden crear
+        }
+    }
+
+    // GESTIÓN DEL MODAL DE LOGIN
+    if (btnLoginOpen) {
+        btnLoginOpen.onclick = () => {
+            if (modalLogin) modalLogin.style.display = 'flex';
+        };
+    }
+    if (closeLoginBtn) {
+        closeLoginBtn.onclick = () => {
+            if (modalLogin) modalLogin.style.display = 'none';
+        };
+    }
+
+    // PROCESAR FORMULARIO DE LOGIN
+    if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+
+            try {
+                const res = await fetch(`${AUTH_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('rol', data.usuario.rol);
+                    localStorage.setItem('nombre', data.usuario.nombre);
+                    
+                    if (modalLogin) modalLogin.style.display = 'none';
+                    loginForm.reset();
+                    alert(`¡Bienvenido de nuevo, ${data.usuario.nombre}!`);
+                    
+                    verificarEstadoSesion();
+                    obtenerInmueblesAPI();
+                } else {
+                    alert(data.message || 'Credenciales incorrectas');
+                }
+            } catch (err) {
+                console.error('Error en el inicio de sesión:', err);
+                alert('No se pudo conectar con el servidor de autenticación.');
+            }
+        });
+    }
+
+    // CERRAR SESIÓN
+    if (btnLogout) {
+        btnLogout.onclick = () => {
+            localStorage.clear();
+            alert('Sesión cerrada correctamente');
+            verificarEstadoSesion();
+            obtenerInmueblesAPI();
+        };
+    }
 
     // 1. CARGAR INMUEBLES DESDE MONGODB (API)
     async function obtenerInmueblesAPI() {
@@ -80,6 +172,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const fin = inicio + itemsPorPagina;
         const inmueblesVisibles = filtrados.slice(inicio, fin);
 
+        const rolActual = localStorage.getItem('rol');
+
         if (inmueblesVisibles.length === 0) {
             propertyList.innerHTML = `<p style="text-align:center; padding: 30px; color: #64748b; font-weight: 500;"> No se encontraron torres o inmuebles con los filtros seleccionados.</p>`;
             paginationContainer.innerHTML = '';
@@ -87,12 +181,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         inmueblesVisibles.forEach((inmueble) => {
-            // Usamos '_id' provisto por MongoDB
             const idInmueble = inmueble._id;
 
             const nuevaFila = document.createElement('div');
             nuevaFila.className = 'property-item';
             
+            // Si es admin se muestra el botón eliminar, si no, se oculta visualmente
+            const botonEliminarHtml = (rolActual === 'admin') 
+                ? `<a href="#" class="btn-eliminar" style="color: #ef4444;">Eliminar</a>` 
+                : '';
+
             nuevaFila.innerHTML = `
                 <img src="${inmueble.foto || defaultImgUrl}" alt="${inmueble.tipo}">
                 <div class="prop-type">
@@ -103,29 +201,36 @@ document.addEventListener('DOMContentLoaded', () => {
                 <span class="prop-price"><strong>Q ${Number(inmueble.valor).toLocaleString()}</strong></span>
                 <div class="prop-actions">
                     <a href="#" class="btn-ver">Ver</a>
-                    <a href="#" class="btn-eliminar" style="color: #ef4444;">Eliminar</a>
+                    ${botonEliminarHtml}
                 </div>
             `;
 
-            // 2. ELIMINAR DESDE LA API (MONGODB)
-            nuevaFila.querySelector('.btn-eliminar').onclick = async (ev) => {
-                ev.preventDefault();
-                if(confirm('¿Deseas demoler / eliminar este registro de la base de datos?')) {
-                    try {
-                        const response = await fetch(`${API_URL}/${idInmueble}`, {
-                            method: 'DELETE'
-                        });
-                        
-                        if (response.ok) {
-                            await obtenerInmueblesAPI(); // Recarga los datos actualizados
-                        } else {
-                            alert('No se pudo eliminar el registro.');
+            // 2. ELIMINAR DESDE LA API (MONGODB) CON AUTORIZACIÓN JWT
+            const btnEliminarRef = nuevaFila.querySelector('.btn-eliminar');
+            if (btnEliminarRef) {
+                btnEliminarRef.onclick = async (ev) => {
+                    ev.preventDefault();
+                    if(confirm('¿Deseas demoler / eliminar este registro de la base de datos?')) {
+                        try {
+                            const response = await fetch(`${API_URL}/${idInmueble}`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                                }
+                            });
+                            
+                            if (response.ok) {
+                                await obtenerInmueblesAPI(); 
+                            } else {
+                                const errData = await response.json();
+                                alert(errData.message || 'No se pudo eliminar el registro.');
+                            }
+                        } catch (error) {
+                            console.error('Error al eliminar:', error);
                         }
-                    } catch (error) {
-                        console.error('Error al eliminar:', error);
                     }
-                }
-            };
+                };
+            }
 
             nuevaFila.querySelector('.btn-ver').onclick = (ev) => {
                 ev.preventDefault();
@@ -181,18 +286,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    btnNuevo.addEventListener('click', () => {
-        modalTitle.textContent = 'Nuevo Inmueble Urbano (MongoDB)';
-        form.reset(); 
-        setFormInputsState(false);
-        btnGuardar.style.display = 'block';
-        btnFotoLabel.style.display = 'inline-block';
-        previewImg.src = defaultImgUrl;
-        imagenActualBase64 = defaultImgUrl;
-        modal.style.display = 'flex';
-    });
+    if (btnNuevo) {
+        btnNuevo.addEventListener('click', () => {
+            modalTitle.textContent = 'Nuevo Inmueble Urbano (MongoDB)';
+            form.reset(); 
+            setFormInputsState(false);
+            btnGuardar.style.display = 'block';
+            btnFotoLabel.style.display = 'inline-block';
+            previewImg.src = defaultImgUrl;
+            imagenActualBase64 = defaultImgUrl;
+            modal.style.display = 'flex';
+        });
+    }
 
-    // 3. CREAR / GUARDAR REGISTRO EN MONGODB VÍA API POST
+    // 3. CREAR / GUARDAR REGISTRO EN MONGODB VÍA API POST CON TOKEN JWT
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -214,16 +321,20 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(API_URL, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 body: JSON.stringify(datosInmueble)
             });
 
             if (response.ok) {
                 modal.style.display = 'none';
-                await obtenerInmueblesAPI(); // Recarga la lista directamente desde la BD
+                await obtenerInmueblesAPI(); 
                 alert("¡Torre / Inmueble registrado con éxito en MongoDB!");
             } else {
-                alert("Error al registrar el inmueble en el servidor.");
+                const errData = await response.json();
+                alert(errData.message || "Error al registrar el inmueble en el servidor.");
             }
         } catch (error) {
             console.error('Error al enviar los datos:', error);
@@ -257,9 +368,13 @@ document.addEventListener('DOMContentLoaded', () => {
         inputs.forEach(input => input.disabled = disabled);
     }
 
-    closeBtn.onclick = () => modal.style.display = 'none';
-    window.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
+    if (closeBtn) closeBtn.onclick = () => modal.style.display = 'none';
+    window.onclick = (e) => { 
+        if (e.target === modal) modal.style.display = 'none';
+        if (e.target === modalLogin) modal.style.display = 'none';
+    };
 
-    // Inicializar cargando los datos de la API
+    // Inicializar verificando sesión y cargando los datos de la API
+    verificarEstadoSesion();
     obtenerInmueblesAPI();
 });

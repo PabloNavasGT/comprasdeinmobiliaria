@@ -18,15 +18,29 @@ document.addEventListener('DOMContentLoaded', () => {
     const previewImg = document.getElementById('preview-img');
     const btnFotoLabel = document.querySelector('.btn-foto'); 
     
-    let listaInmuebles = JSON.parse(localStorage.getItem('inmuebles')) || [];
+    let listaInmuebles = [];
     let paginaActual = 1;
     const itemsPorPagina = 3;
     
     const defaultImgUrl = "https://via.placeholder.com/300x300?text=Sin+Fachada";
     let imagenActualBase64 = defaultImgUrl; 
 
-    function persistirDatos() {
-        localStorage.setItem('inmuebles', JSON.stringify(listaInmuebles));
+    // URL de tu Backend en Node.js / Express
+    const API_URL = 'http://localhost:4000/api/inmuebles';
+
+    // 1. CARGAR INMUEBLES DESDE MONGODB (API)
+    async function obtenerInmueblesAPI() {
+        try {
+            const response = await fetch(API_URL);
+            const resultado = await response.json();
+            if (resultado.success) {
+                listaInmuebles = resultado.data;
+                renderizarTodo();
+            }
+        } catch (error) {
+            console.error('Error al conectar con la API de MongoDB:', error);
+            propertyList.innerHTML = `<p style="text-align:center; padding: 30px; color: #ef4444; font-weight: 500;">❌ Error de conexión con el servidor backend.</p>`;
+        }
     }
 
     function obtenerInmueblesFiltrados() {
@@ -73,13 +87,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         inmueblesVisibles.forEach((inmueble) => {
-            const indiceReal = listaInmuebles.findIndex(el => el === inmueble);
+            // Usamos '_id' provisto por MongoDB
+            const idInmueble = inmueble._id;
 
             const nuevaFila = document.createElement('div');
             nuevaFila.className = 'property-item';
             
             nuevaFila.innerHTML = `
-                <img src="${inmueble.foto}" alt="${inmueble.tipo}">
+                <img src="${inmueble.foto || defaultImgUrl}" alt="${inmueble.tipo}">
                 <div class="prop-type">
                     <strong> ${inmueble.tipo}</strong><br>
                     <small style="color:#64748b;">Niveles: ${inmueble.pisos}</small>
@@ -92,16 +107,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `;
 
-            nuevaFila.querySelector('.btn-eliminar').onclick = (ev) => {
+            // 2. ELIMINAR DESDE LA API (MONGODB)
+            nuevaFila.querySelector('.btn-eliminar').onclick = async (ev) => {
                 ev.preventDefault();
-                if(confirm('¿Deseas demoler / eliminar este registro?')) {
-                    listaInmuebles.splice(indiceReal, 1);
-                    persistirDatos();
-                    
-                    const totalPaginas = Math.ceil(obtenerInmueblesFiltrados().length / itemsPorPagina) || 1;
-                    if (paginaActual > totalPaginas) paginaActual = totalPaginas;
-
-                    renderizarTodo();
+                if(confirm('¿Deseas demoler / eliminar este registro de la base de datos?')) {
+                    try {
+                        const response = await fetch(`${API_URL}/${idInmueble}`, {
+                            method: 'DELETE'
+                        });
+                        
+                        if (response.ok) {
+                            await obtenerInmueblesAPI(); // Recarga los datos actualizados
+                        } else {
+                            alert('No se pudo eliminar el registro.');
+                        }
+                    } catch (error) {
+                        console.error('Error al eliminar:', error);
+                    }
                 }
             };
 
@@ -160,7 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     btnNuevo.addEventListener('click', () => {
-        modalTitle.textContent = 'Nuevo Inmueble Urbano';
+        modalTitle.textContent = 'Nuevo Inmueble Urbano (MongoDB)';
         form.reset(); 
         setFormInputsState(false);
         btnGuardar.style.display = 'block';
@@ -170,7 +192,8 @@ document.addEventListener('DOMContentLoaded', () => {
         modal.style.display = 'flex';
     });
 
-    form.addEventListener('submit', (e) => {
+    // 3. CREAR / GUARDAR REGISTRO EN MONGODB VÍA API POST
+    form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         const datosInmueble = {
@@ -178,22 +201,33 @@ document.addEventListener('DOMContentLoaded', () => {
             direccion: document.getElementById('direccion').value,
             ciudad: document.getElementById('ciudad').value,
             departamento: document.getElementById('departamento').value,
-            pisos: document.getElementById('pisos').value,
-            area: document.getElementById('area').value,
+            pisos: Number(document.getElementById('pisos').value),
+            area: Number(document.getElementById('area').value) || undefined,
             matricula: document.getElementById('matricula').value,
             propietario: document.getElementById('propietario').value,
-            valor: document.getElementById('valor').value,
+            valor: Number(document.getElementById('valor').value),
             comercial: document.getElementById('comercial').checked,
             descripcion: document.getElementById('descripcion').value,
             foto: imagenActualBase64
         };
 
-        listaInmuebles.push(datosInmueble);
-        persistirDatos();
-        
-        modal.style.display = 'none';
-        renderizarTodo();
-        alert("¡Torre / Inmueble registrado con éxito en la ciudad!");
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(datosInmueble)
+            });
+
+            if (response.ok) {
+                modal.style.display = 'none';
+                await obtenerInmueblesAPI(); // Recarga la lista directamente desde la BD
+                alert("¡Torre / Inmueble registrado con éxito en MongoDB!");
+            } else {
+                alert("Error al registrar el inmueble en el servidor.");
+            }
+        } catch (error) {
+            console.error('Error al enviar los datos:', error);
+        }
     });
 
     function rellenarFormularioSoloVer(datos) {
@@ -207,9 +241,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('ciudad').value = datos.ciudad;
         document.getElementById('departamento').value = datos.departamento;
         document.getElementById('pisos').value = datos.pisos || 1;
-        document.getElementById('area').value = datos.area;
-        document.getElementById('matricula').value = datos.matricula;
-        document.getElementById('propietario').value = datos.propietario;
+        document.getElementById('area').value = datos.area || '';
+        document.getElementById('matricula').value = datos.matricula || '';
+        document.getElementById('propietario').value = datos.propietario || '';
         document.getElementById('valor').value = datos.valor;
         document.getElementById('comercial').checked = datos.comercial;
         document.getElementById('descripcion').value = datos.descripcion || '';
@@ -226,5 +260,6 @@ document.addEventListener('DOMContentLoaded', () => {
     closeBtn.onclick = () => modal.style.display = 'none';
     window.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
 
-    renderizarTodo();
+    // Inicializar cargando los datos de la API
+    obtenerInmueblesAPI();
 });

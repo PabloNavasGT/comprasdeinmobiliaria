@@ -10,4 +10,4 @@ const userSchema = new Schema({
     versionKey: false
 });
 
-module.exports = model('User', userSchema);
+module.exports = model('User', userSchema, 'usuarios');

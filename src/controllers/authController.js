@@ -7,7 +7,7 @@ const SECRET_KEY = process.env.JWT_SECRET || 'clave_secreta_super_segura';
 const registrar = async (req, res) => {
     try {
         const { nombre, email, password, rol } = req.body;
-        
+
         const existeUsuario = await User.findOne({ email });
         if (existeUsuario) {
             return res.status(400).json({ success: false, message: 'El correo ya está registrado' });
@@ -24,7 +24,7 @@ const registrar = async (req, res) => {
         });
 
         await nuevoUsuario.save();
-        res.status(201).json({ success: true, message: 'Usuario registrado con éxito' });
+        res.status(201).json({ success: true, message: '¡Usuario registrado con éxito!' });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Error al registrar usuario', error: error.message });
     }

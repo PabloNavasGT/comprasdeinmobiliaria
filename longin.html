@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CityEstate - Acceso y Registro</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="city-skyline">
+        <div class="cloud cloud-1"></div>
+        <div class="cloud cloud-2"></div>
+    </div>
+
+    <div class="container" style="max-width: 450px; margin-top: 50px;">
+        <div style="text-align: center; margin-bottom: 25px;">
+            <h1>CityEstate <span class="subtitle-city">Portal</span></h1>
+            <p style="color: #64748b; font-size: 14px; margin-top: 5px;">Gestión Urbana Inteligente</p>
+        </div>
+
+        <!-- FORMULARIO DE INICIO DE SESIÓN -->
+        <div id="section-login">
+            <h2 style="margin-bottom: 15px; color: #1e293b;">Iniciar Sesión</h2>
+            <form id="form-login" style="display: flex; flex-direction: column; gap: 15px;">
+                <div class="input-group">
+                    <label>Correo Electrónico</label>
+                    <input type="email" id="login-email" required placeholder="correo@example.com">
+                </div>
+                <div class="input-group">
+                    <label>Contraseña</label>
+                    <input type="password" id="login-password" required placeholder="********">
+                </div>
+                <button type="submit" class="btn-primary">Entrar a CityEstate</button>
+            </form>
+            <p style="text-align: center; margin-top: 20px; font-size: 13px; color: #475569;">
+                ¿No tienes una cuenta? <a href="#" id="show-register" style="color: #0284c7; font-weight: bold; text-decoration: none;">Regístrate aquí</a>
+            </p>
+        </div>
+
+        <!-- FORMULARIO DE REGISTRO -->
+        <div id="section-register" style="display: none;">
+            <h2 style="margin-bottom: 15px; color: #1e293b;">Crear Cuenta Nueva</h2>
+            <form id="form-register" style="display: flex; flex-direction: column; gap: 15px;">
+                <div class="input-group">
+                    <label>Nombre Completo</label>
+                    <input type="text" id="reg-nombre" required placeholder="Tu nombre">
+                </div>
+                <div class="input-group">
+                    <label>Correo Electrónico</label>
+                    <input type="email" id="reg-email" required placeholder="correo@example.com">
+                </div>
+                <div class="input-group">
+                    <label>Contraseña</label>
+                    <input type="password" id="reg-password" required placeholder="********">
+                </div>
+                <!-- Nota: Por defecto se registran como 'user'. El Admin se puede crear directamente en MongoDB o vía código -->
+                <button type="submit" class="btn-primary" style="background: linear-gradient(135deg, #059669 0%, #047857 100%);">Registrarse</button>
+            </form>
+            <p style="text-align: center; margin-top: 20px; font-size: 13px; color: #475569;">
+                ¿Ya tienes una cuenta? <a href="#" id="show-login" style="color: #0284c7; font-weight: bold; text-decoration: none;">Inicia sesión</a>
+            </p>
+        </div>
+
+        <div style="text-align: center; margin-top: 25px;">
+            <a href="index.html" style="color: #64748b; font-size: 13px; text-decoration: none;">← Volver al catálogo principal</a>
+        </div>
+    </div>
+
+    <script src="login-client.js"></script>
+</body>
+</html>

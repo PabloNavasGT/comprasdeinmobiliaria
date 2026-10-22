@@ -1,5 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
-    
+
+    // 🔒 PROTEGER RUTA: Si no hay token, redirigir al login de inmediato
+    const tokenSeguridad = localStorage.getItem('token');
+    if (!tokenSeguridad) {
+        window.location.href = 'longin.html';
+        return;
+    }
+
     const modal = document.getElementById('modal-inmueble');
     const btnNuevo = document.getElementById('btn-nuevo');
     const closeBtn = document.querySelector('.close-btn');
@@ -20,11 +27,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Elementos de autenticación
     const modalLogin = document.getElementById('modal-login');
-    const btnLoginOpen = document.getElementById('btn-login-open');
     const closeLoginBtn = document.querySelector('.close-login-btn');
-    const loginForm = document.getElementById('login-form');
     const btnLogout = document.getElementById('btn-logout');
     const userDisplay = document.getElementById('user-display');
+    const btnAdminToggle = document.getElementById('btn-admin-toggle');
     
     let listaInmuebles = [];
     let paginaActual = 1;
@@ -44,79 +50,64 @@ document.addEventListener('DOMContentLoaded', () => {
         const nombre = localStorage.getItem('nombre');
 
         if (token) {
-            if (btnLoginOpen) btnLoginOpen.style.display = 'none';
             if (btnLogout) btnLogout.style.display = 'block';
             if (userDisplay) userDisplay.textContent = `👤 ${nombre} (${rol ? rol.toUpperCase() : 'USER'})`;
 
-            // Si es un usuario normal ('user'), ocultar el botón de crear inmueble
-            if (rol !== 'admin' && btnNuevo) {
-                btnNuevo.style.display = 'none';
-            } else if (rol === 'admin' && btnNuevo) {
-                btnNuevo.style.display = 'block';
+            // Si es administrador, mostrar el botón de crear inmueble y ocultar el botón de admin
+            if (rol === 'admin') {
+                if (btnAdminToggle) btnAdminToggle.style.display = 'none';
+                if (btnNuevo) btnNuevo.style.display = 'block';
+            } else {
+                if (btnAdminToggle) btnAdminToggle.style.display = 'block';
+                if (btnNuevo) btnNuevo.style.display = 'none'; // Usuario normal no puede crear
             }
         } else {
-            if (btnLoginOpen) btnLoginOpen.style.display = 'block';
             if (btnLogout) btnLogout.style.display = 'none';
             if (userDisplay) userDisplay.textContent = '';
-            if (btnNuevo) btnNuevo.style.display = 'none'; // Los visitantes no pueden crear
+            if (btnNuevo) btnNuevo.style.display = 'none';
         }
     }
 
-    // GESTIÓN DEL MODAL DE LOGIN
-    if (btnLoginOpen) {
-        btnLoginOpen.onclick = () => {
-            if (modalLogin) modalLogin.style.display = 'flex';
-        };
-    }
-    if (closeLoginBtn) {
-        closeLoginBtn.onclick = () => {
-            if (modalLogin) modalLogin.style.display = 'none';
-        };
-    }
+    // ACCIÓN DEL BOTÓN DIRECTO PARA ACTIVAR MODO ADMIN
+    if (btnAdminToggle) {
+        btnAdminToggle.onclick = async () => {
+            const emailAdmin = prompt("Ingresa el correo de Administrador:");
+            const passwordAdmin = prompt("Ingresa la contraseña de Administrador:");
 
-    // PROCESAR FORMULARIO DE LOGIN
-    if (loginForm) {
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
+            if (!emailAdmin || !passwordAdmin) return;
 
             try {
                 const res = await fetch(`${AUTH_URL}/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
+                    body: JSON.stringify({ email: emailAdmin, password: passwordAdmin })
                 });
                 const data = await res.json();
 
-                if (data.success) {
+                if (data.success && data.usuario.rol === 'admin') {
                     localStorage.setItem('token', data.token);
-                    localStorage.setItem('rol', data.usuario.rol);
+                    localStorage.setItem('rol', 'admin');
                     localStorage.setItem('nombre', data.usuario.nombre);
-                    
-                    if (modalLogin) modalLogin.style.display = 'none';
-                    loginForm.reset();
-                    alert(`¡Bienvenido de nuevo, ${data.usuario.nombre}!`);
-                    
+
+                    alert(`¡Modo Administrador activado con éxito, ${data.usuario.nombre}!`);
                     verificarEstadoSesion();
                     obtenerInmueblesAPI();
                 } else {
-                    alert(data.message || 'Credenciales incorrectas');
+                    alert('⚠️ Credenciales incorrectas o la cuenta no tiene permisos de Administrador.');
                 }
             } catch (err) {
-                console.error('Error en el inicio de sesión:', err);
-                alert('No se pudo conectar con el servidor de autenticación.');
+                console.error('Error al activar admin:', err);
+                alert('No se pudo conectar con el servidor.');
             }
-        });
+        };
     }
 
-    // CERRAR SESIÓN
+    // CERRAR SESIÓN (Expulsa al login de inmediato)
     if (btnLogout) {
         btnLogout.onclick = () => {
             localStorage.clear();
             alert('Sesión cerrada correctamente');
-            verificarEstadoSesion();
-            obtenerInmueblesAPI();
+            window.location.href = 'longin.html';
         };
     }
 
@@ -131,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (error) {
             console.error('Error al conectar con la API de MongoDB:', error);
-            propertyList.innerHTML = `<p style="text-align:center; padding: 30px; color: #ef4444; font-weight: 500;">❌ Error de conexión con el servidor backend.</p>`;
+            propertyList.innerHTML = `<p style="text-align:center; padding: 30px; color: #ef4444; font-weight: 500;"> Error de conexión con el servidor backend.</p>`;
         }
     }
 
@@ -186,7 +177,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const nuevaFila = document.createElement('div');
             nuevaFila.className = 'property-item';
             
-            // Si es admin se muestra el botón eliminar, si no, se oculta visualmente
             const botonEliminarHtml = (rolActual === 'admin') 
                 ? `<a href="#" class="btn-eliminar" style="color: #ef4444;">Eliminar</a>` 
                 : '';
@@ -205,7 +195,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `;
 
-            // 2. ELIMINAR DESDE LA API (MONGODB) CON AUTORIZACIÓN JWT
             const btnEliminarRef = nuevaFila.querySelector('.btn-eliminar');
             if (btnEliminarRef) {
                 btnEliminarRef.onclick = async (ev) => {
@@ -299,7 +288,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 3. CREAR / GUARDAR REGISTRO EN MONGODB VÍA API POST CON TOKEN JWT
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 

@@ -10,14 +10,14 @@ const app = express();
 connectDB();
 
 // Middlewares
+// Middlewares
 app.use(cors());
-app.use('/api/auth', authRoutes);
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json({ limit: '10mb' })); // Primero se configura para procesar JSON
 
-// Servir archivos estáticos del frontend (index.html, style.css, etc.)
+// Archivos estáticos y Rutas de la API
 app.use(express.static(path.join(__dirname))); 
-
-// Rutas de la API
+app.use('/api/auth', authRoutes);
 app.use('/api/inmuebles', inmuebleRoutes);
+
 
 module.exports = app;

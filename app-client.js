@@ -145,6 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 coincidePrecio = valorNum >= 0 && valorNum <= 500;
             } else if (rangoPrecioQuery === '500-4000') {
                 coincidePrecio = valorNum > 500 && valorNum <= 4000;
+
             } else if (rangoPrecioQuery === '4000-up') {
                 coincidePrecio = valorNum > 4000;
             }
@@ -287,20 +288,23 @@ document.addEventListener('DOMContentLoaded', () => {
             modal.style.display = 'flex';
         });
     }
-
+// Al enviar el formulario (Crear en MongoDB)
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
         const datosInmueble = {
             tipo: document.getElementById('tipo').value,
+            operacion: document.getElementById('operacion').value,
             direccion: document.getElementById('direccion').value,
             ciudad: document.getElementById('ciudad').value,
             departamento: document.getElementById('departamento').value,
+            area: document.getElementById('area').value,
             pisos: Number(document.getElementById('pisos').value),
-            area: Number(document.getElementById('area').value) || undefined,
+            contacto: document.getElementById('contacto').value,
+            valor: Number(document.getElementById('valor').value),
+            enganche: Number(document.getElementById('enganche').value) || 0,
             matricula: document.getElementById('matricula').value,
             propietario: document.getElementById('propietario').value,
-            valor: Number(document.getElementById('valor').value),
             comercial: document.getElementById('comercial').checked,
             descripcion: document.getElementById('descripcion').value,
             foto: imagenActualBase64
@@ -319,10 +323,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 modal.style.display = 'none';
                 await obtenerInmueblesAPI(); 
-                alert("¡Torre / Inmueble registrado con éxito en MongoDB!");
+                alert("¡Inmueble registrado con éxito en MongoDB!");
             } else {
                 const errData = await response.json();
-                alert(errData.message || "Error al registrar el inmueble en el servidor.");
+                alert(errData.message || "Error al registrar el inmueble.");
             }
         } catch (error) {
             console.error('Error al enviar los datos:', error);
@@ -330,20 +334,23 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function rellenarFormularioSoloVer(datos) {
-        modalTitle.textContent = 'Detalle de la Torre / Inmueble';
+        modalTitle.textContent = 'Detalle del Inmueble';
         setFormInputsState(true);
         btnGuardar.style.display = 'none';
         btnFotoLabel.style.display = 'none';
         
         document.getElementById('tipo').value = datos.tipo;
+        document.getElementById('operacion').value = datos.operacion || 'A la venta';
         document.getElementById('direccion').value = datos.direccion;
         document.getElementById('ciudad').value = datos.ciudad;
         document.getElementById('departamento').value = datos.departamento;
-        document.getElementById('pisos').value = datos.pisos || 1;
         document.getElementById('area').value = datos.area || '';
+        document.getElementById('pisos').value = datos.pisos || 1;
+        document.getElementById('contacto').value = datos.contacto || '';
         document.getElementById('matricula').value = datos.matricula || '';
         document.getElementById('propietario').value = datos.propietario || '';
         document.getElementById('valor').value = datos.valor;
+        document.getElementById('enganche').value = datos.enganche || 0;
         document.getElementById('comercial').checked = datos.comercial;
         document.getElementById('descripcion').value = datos.descripcion || '';
         previewImg.src = datos.foto || defaultImgUrl;
@@ -367,29 +374,3 @@ document.addEventListener('DOMContentLoaded', () => {
     obtenerInmueblesAPI();
 });
 
-// Función para ascender a un usuario desde el cliente (ejecutable mediante un prompt o botón)
-async function ascenderUsuarioWeb() {
-    const emailObjetivo = prompt("Ingresa el correo del usuario que deseas hacer Administrador:");
-    if (!emailObjetivo) return;
-
-    try {
-        const response = await fetch(`${AUTH_URL}/hacer-admin`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token')}` // Envía el token del admin actual
-            },
-            body: JSON.stringify({ email: emailObjetivo })
-        });
-
-        const data = await response.json();
-        if (response.ok && data.success) {
-            alert(data.message);
-        } else {
-            alert(data.message || 'No se pudo actualizar el rol.');
-        }
-    } catch (error) {
-        console.error('Error al ascender usuario:', error);
-        alert('Error de conexión con el servidor.');
-    }
-}

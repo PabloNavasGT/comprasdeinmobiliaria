@@ -1,21 +1,21 @@
-const { Schema, model } = require('mongoose');
+const mongoose = require('mongoose');
 
-const inmuebleSchema = new Schema({
-    tipo: { type: String, required: true, enum: ['Apartamento', 'Casa', 'Oficina', 'Local Comercial', 'Bodega', 'Lote / Terreno', 'Finca'] },
-    direccion: { type: String, required: true, trim: true },
-    ciudad: { type: String, required: true, trim: true },
-    departamento: { type: String, required: true, trim: true },
-    pisos: { type: Number, required: true, min: 1, default: 1 },
-    area: { type: Number },
-    matricula: { type: String, trim: true },
-    propietario: { type: String, trim: true },
-    valor: { type: Number, required: true, min: 0 },
+const inmuebleSchema = new mongoose.Schema({
+    tipo: { type: String, required: true },
+    direccion: { type: String, required: true },
+    ciudad: { type: String, required: true },
+    departamento: { type: String, required: true },
+    pisos: { type: Number, default: 1 },
+    area: { type: String, required: true }, // Formato "Frente x Fondo" (____X____)
+    operacion: { type: String, enum: ['A la venta', 'Alquilado'], required: true },
+    contacto: { type: String, required: true },
+    matricula: { type: String },
+    propietario: { type: String },
+    valor: { type: Number, required: true },
+    enganche: { type: Number, default: 0 },
     comercial: { type: Boolean, default: false },
     descripcion: { type: String },
-    foto: { type: String } // Almacena URL o Base64
-}, {
-    timestamps: true,
-    versionKey: false
-});
+    foto: { type: String }
+}, { timestamps: true });
 
-module.exports = model('Inmueble', inmuebleSchema);
+module.exports = mongoose.model('Inmueble', inmuebleSchema);

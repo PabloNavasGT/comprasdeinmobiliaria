@@ -1,15 +1,38 @@
-<header class="hero-header">
-    <div class="hero-title-area">
-        <h1> CityEstate <span class="subtitle-city">Guatemala</span></h1>
-        <span id="contador-inmuebles" class="badge-contador">Torres activas: 0</span>
-        <link rel="stylesheet" href="style.css">
-                <!-- Controles de Autenticación -->
-             <div class="auth-controls" style="display: flex; gap: 10px; align-items: center;">
-    <span id="user-display" style="color: #38bdf8; font-size: 13px; font-weight: bold;"></span>
-    <button id="btn-admin-toggle" class="btn-primary" style="background: #334155; border: 1px solid #38bdf8;">🔑 Activar Modo Admin</button>
-    <button id="btn-logout" class="btn-primary" style="background: #ef4444; display: none;">Cerrar Sesión</button>
-</div>
-            
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CityEstate Guatemala</title>
+    <!-- Hoja de estilos en el head -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- FONDO ANIMADO DE LA CIUDAD -->
+    <div class="city-skyline">
+        <div class="cloud cloud-1"></div>
+        <div class="cloud cloud-2"></div>
+    </div>
+
+    <!-- TARJETA CONTENEDORA PRINCIPAL (AQUÍ SE APLICAN LOS ESTILOS DEL CSS) -->
+  
+
+        <!-- CABECERA PRINCIPAL DENTRO DE LA TARJETA -->
+        <header class="hero-header">
+            <div class="hero-title-area">
+                <h1>CityEstate <span class="subtitle-city">Guatemala</span></h1>
+                <span id="contador-inmuebles" class="badge-contador">Torres activas: 0</span>
+            </div>
+
+            <!-- CONTROLES DE AUTENTICACIÓN -->
+            <div class="auth-controls" style="display: flex; gap: 10px; align-items: center;">
+                <span id="user-display" style="color: #38bdf8; font-size: 13px; font-weight: bold;"></span>
+                <button id="btn-admin-toggle" class="btn-primary" style="background: #334155; border: 1px solid #38bdf8;">🔑 Activar Modo Admin</button>
+                <button id="btn-logout" class="btn-primary" style="background: #ef4444; display: none;">Cerrar Sesión</button>
+            </div>
+                
+            <!-- BÚSQUEDA Y FILTROS -->
             <div class="hero-controls">
                 <div class="search-container">
                     <input type="text" id="input-buscar" placeholder=" Buscar por zona, dirección o ciudad...">
@@ -25,6 +48,10 @@
                         <option value="Bodega">Bodega</option>
                         <option value="Lote / Terreno">Lote / Terreno</option>
                         <option value="Finca">Finca</option>
+                        <option value="Choza">Choza</option>
+                        <option value="Castillo">Castillo</option>
+                        <option value="Dúplex">Dúplex</option>
+                        <option value="Mansión">Mansión</option>
                     </select>
 
                     <select id="filtro-precio">
@@ -38,17 +65,18 @@
                 <button id="btn-nuevo" class="btn-primary">+ Nuevo Edificio / Inmueble</button>
             </div>
         </header>
-    <div class="container">
-        <!-- LISTADO ESTILO FACHADA DE EDIFICIO -->
+  <div class="container">
+        <!-- LISTADO DE PROPIEDADES -->
         <div class="property-list" id="property-list">
             <!-- Renderizado dinámico -->
         </div>
 
         <!-- PAGINACIÓN -->
         <div class="pagination" id="pagination-container"></div>
-    </div>
 
-    <!-- MODAL DE REGISTRO / DETALLE -->
+    </div> <!-- FIN DE .container -->
+
+    <!-- MODAL REGISTRO / DETALLE -->
     <div id="modal-inmueble" class="modal">
         <div class="modal-content">
             <span class="close-btn">&times;</span>
@@ -60,7 +88,7 @@
                         <img id="preview-img" src="https://via.placeholder.com/300x300?text=Sin+Foto" alt="Foto">
                     </div>
                     <label for="foto-upload" class="btn-primary btn-foto">
-                         Seleccionar Fachada / Foto
+                        Seleccionar Fachada / Foto
                     </label>
                     <input type="file" id="foto-upload" accept="image/*" style="display: none;">
                 </div>
@@ -72,6 +100,11 @@
                             <select id="tipo" required>
                                 <option value="Apartamento">Apartamento</option>
                                 <option value="Casa">Casa</option>
+                                <option value="Mansión">Mansión</option>
+                                <option value="Dúplex">Dúplex</option>
+                                <option value="Choza">Choza</option>
+                                <option value="Castillo">Castillo</option>
+                                <option value="Cuarto-habitación">Cuarto-habitación</option>
                                 <option value="Oficina">Oficina</option>
                                 <option value="Local Comercial">Local Comercial</option>
                                 <option value="Bodega">Bodega</option>
@@ -79,45 +112,97 @@
                                 <option value="Finca">Finca</option>
                             </select>
                         </div>
+
+                        <div class="input-group">
+                            <label>Operación</label>
+                            <select id="operacion" required>
+                                <option value="A la venta">A la venta</option>
+                                <option value="Alquilado">Alquilado</option>
+                            </select>
+                        </div>
+
                         <div class="input-group">
                             <label>Dirección Exacta</label>
                             <input type="text" id="direccion" required placeholder="Ej: 14 calle 5-25 Zona 10">
                         </div>
+
                         <div class="input-group">
                             <label>Ciudad / Municipio</label>
                             <input type="text" id="ciudad" required placeholder="Ej: Guatemala">
                         </div>
+
                         <div class="input-group">
                             <label>Departamento</label>
-                            <input type="text" id="departamento" required placeholder="Ej: Guatemala">
+                            <select id="departamento" required>
+                                <option value="">Seleccione departamento</option>
+                                <option value="Alta Verapaz">Alta Verapaz</option>
+                                <option value="Baja Verapaz">Baja Verapaz</option>
+                                <option value="Chimaltenango">Chimaltenango</option>
+                                <option value="Chiquimula">Chiquimula</option>
+                                <option value="Guatemala">Guatemala</option>
+                                <option value="El Progreso">El Progreso</option>
+                                <option value="Escuintla">Escuintla</option>
+                                <option value="Huehuetenango">Huehuetenango</option>
+                                <option value="Izabal">Izabal</option>
+                                <option value="Jalapa">Jalapa</option>
+                                <option value="Jutiapa">Jutiapa</option>
+                                <option value="Petén">Petén</option>
+                                <option value="Quetzaltenango">Quetzaltenango</option>
+                                <option value="Quiché">Quiché</option>
+                                <option value="Retalhuleu">Retalhuleu</option>
+                                <option value="Sacatepéquez">Sacatepéquez</option>
+                                <option value="San Marcos">San Marcos</option>
+                                <option value="Santa Rosa">Santa Rosa</option>
+                                <option value="Sololá">Sololá</option>
+                                <option value="Suchitepéquez">Suchitepéquez</option>
+                                <option value="Totonicapán">Totonicapán</option>
+                                <option value="Zacapa">Zacapa</option>
+                            </select>
                         </div>
+
+                        <div class="input-group">
+                            <label>Área</label>
+                            <input type="text" id="area" required placeholder="Ej: 10 x 20 mtrs">
+                        </div>
+
                         <div class="input-group">
                             <label>Número de Pisos / Niveles</label>
                             <input type="number" id="pisos" min="1" value="1" required placeholder="Ej: 2">
                         </div>
+
                         <div class="input-group">
-                            <label>Área (m²)</label>
-                            <input type="number" id="area" placeholder="Ej: 120">
+                            <label>Número de Contacto</label>
+                            <input type="text" id="contacto" required placeholder="Ej: +502 5555-5555">
                         </div>
+
+                        <div class="input-group">
+                            <label>Valor del Inmueble (Q)</label>
+                            <input type="number" id="valor" required placeholder="Ej: 350000">
+                        </div>
+
+                        <div class="input-group">
+                            <label>Precio Enganche (Q)</label>
+                            <input type="number" id="enganche" placeholder="Ej: 35000">
+                        </div>
+
                         <div class="input-group">
                             <label>Matrícula Inmobiliaria</label>
                             <input type="text" id="matricula" placeholder="Ej: 1234-GT">
                         </div>
+
                         <div class="input-group">
                             <label>Propietario</label>
                             <input type="text" id="propietario" placeholder="Nombre completo">
                         </div>
-                        <div class="input-group">
-                            <label>Valor del Inmueble (Q)</label>
-                            <input type="number" id="valor" required placeholder="Ej: 3500">
-                        </div>
-                        <div class="input-group checkbox-group">
+
+                        <div class="input-group checkbox-group full-width">
                             <input type="checkbox" id="comercial">
                             <label for="comercial">Apto para uso comercial / Oficinas</label>
                         </div>
+
                         <div class="input-group full-width">
                             <label>Descripción detallada</label>
-                            <textarea id="descripcion" rows="3" placeholder="Ej: Cuenta con 3 habitaciones, 2 baños, parqueo, vistas panorámicas..."></textarea>
+                            <textarea id="descripcion" rows="3" placeholder="Ej: Cuenta con habitaciones amplias, acabados de lujo..."></textarea>
                         </div>
                     </div>
                     <div class="form-actions">

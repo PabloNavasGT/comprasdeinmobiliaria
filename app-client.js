@@ -366,3 +366,30 @@ document.addEventListener('DOMContentLoaded', () => {
     verificarEstadoSesion();
     obtenerInmueblesAPI();
 });
+
+// Función para ascender a un usuario desde el cliente (ejecutable mediante un prompt o botón)
+async function ascenderUsuarioWeb() {
+    const emailObjetivo = prompt("Ingresa el correo del usuario que deseas hacer Administrador:");
+    if (!emailObjetivo) return;
+
+    try {
+        const response = await fetch(`${AUTH_URL}/hacer-admin`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}` // Envía el token del admin actual
+            },
+            body: JSON.stringify({ email: emailObjetivo })
+        });
+
+        const data = await response.json();
+        if (response.ok && data.success) {
+            alert(data.message);
+        } else {
+            alert(data.message || 'No se pudo actualizar el rol.');
+        }
+    } catch (error) {
+        console.error('Error al ascender usuario:', error);
+        alert('Error de conexión con el servidor.');
+    }
+}

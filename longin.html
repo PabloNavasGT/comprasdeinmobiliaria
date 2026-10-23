@@ -54,7 +54,10 @@
                     <label>Contraseña</label>
                     <input type="password" id="reg-password" required placeholder="********">
                 </div>
-                <!-- Nota: Por defecto se registran como 'user'. El Admin se puede crear directamente en MongoDB o vía código -->
+                <div class="input-group">
+                    <label>Código Secreto de Admin (Opcional)</label>
+                    <input type="password" id="reg-secret" placeholder="Deja en blanco si eres usuario normal">
+                </div>
                 <button type="submit" class="btn-primary" style="background: linear-gradient(135deg, #059669 0%, #047857 100%);">Registrarse</button>
             </form>
             <p style="text-align: center; margin-top: 20px; font-size: 13px; color: #475569;">

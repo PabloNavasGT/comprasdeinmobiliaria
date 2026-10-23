@@ -6,7 +6,7 @@ const SECRET_KEY = process.env.JWT_SECRET || 'clave_secreta_super_segura';
 
 const registrar = async (req, res) => {
     try {
-        const { nombre, email, password, rol } = req.body;
+        const { nombre, email, password, adminSecret } = req.body;
 
         const existeUsuario = await User.findOne({ email });
         if (existeUsuario) {
@@ -16,15 +16,24 @@ const registrar = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
+        // FORZAMOS LA VALIDACIÓN: Si envían exactamente 'admin123', el rol será admin
+        let rolAsignado = 'user';
+        if (adminSecret && adminSecret.trim() === 'admin123') {
+            rolAsignado = 'admin';
+        }
+
         const nuevoUsuario = new User({
             nombre,
             email,
             password: hashedPassword,
-            rol: rol || 'user'
+            rol: rolAsignado
         });
 
         await nuevoUsuario.save();
-        res.status(201).json({ success: true, message: '¡Usuario registrado con éxito!' });
+        res.status(201).json({ 
+            success: true, 
+            message: `¡Cuenta creada con éxito como ${rolAsignado.toUpperCase()}! Ahora puedes iniciar sesión.` 
+        });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Error al registrar usuario', error: error.message });
     }

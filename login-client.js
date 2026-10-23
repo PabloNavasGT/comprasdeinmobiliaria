@@ -27,24 +27,25 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    // 3. Petición de Registro (Guarda en MongoDB y devuelve al Login)
+    // 3. Petición de Registro (Captura el código secreto opcional)
     if (formRegister) {
         formRegister.addEventListener('submit', async (e) => {
             e.preventDefault();
             const nombre = document.getElementById('reg-nombre').value;
             const email = document.getElementById('reg-email').value;
             const password = document.getElementById('reg-password').value;
+            const adminSecret = document.getElementById('reg-secret').value;
 
             try {
                 const res = await fetch(`${AUTH_URL}/register`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ nombre, email, password, rol: 'user' })
+                    body: JSON.stringify({ nombre, email, password, adminSecret })
                 });
                 const data = await res.json();
 
                 if (data.success) {
-                    alert('¡Cuenta registrada con éxito en MongoDB! Ahora puedes iniciar sesión.');
+                    alert(data.message || '¡Cuenta registrada con éxito! Ahora puedes iniciar sesión.');
                     formRegister.reset();
                     sectionRegister.style.display = 'none';
                     sectionLogin.style.display = 'block';
@@ -58,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 4. Petición de Login (Autentica y lleva al index.html)
+    // 4. Petición de Login
     if (formLogin) {
         formLogin.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -78,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     localStorage.setItem('rol', data.usuario.rol);
                     localStorage.setItem('nombre', data.usuario.nombre);
 
-                    alert(`¡Bienvenido, ${data.usuario.nombre}!`);
+                    alert(`¡Bienvenido, ${data.usuario.nombre} (${data.usuario.rol.toUpperCase()})!`);
                     window.location.href = 'index.html';
                 } else {
                     alert(data.message || 'Credenciales inválidas');
